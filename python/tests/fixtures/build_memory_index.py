@@ -2,6 +2,7 @@
 # Licensed under the MIT license.
 
 import os
+
 from tempfile import mkdtemp
 
 import diskannpy as dap
@@ -11,7 +12,11 @@ from .create_test_data import random_vectors
 
 
 def build_random_vectors_and_memory_index(
-    dtype, metric, with_tags: bool = False, index_prefix: str = "ann", seed: int = 12345
+        dtype,
+        metric,
+        with_tags: bool = False,
+        index_prefix: str = "ann",
+        seed: int = 12345
 ):
     query_vectors: np.ndarray = random_vectors(1000, 10, dtype=dtype, seed=seed)
     index_vectors: np.ndarray = random_vectors(10000, 10, dtype=dtype, seed=seed)
@@ -19,7 +24,7 @@ def build_random_vectors_and_memory_index(
 
     if with_tags:
         rng = np.random.default_rng(seed)
-        tags = np.arange(start=1, stop=10001, dtype=np.uint32)
+        tags = np.arange(start=1, stop=10001, dtype=np.uintc)
         rng.shuffle(tags)
     else:
         tags = ""
@@ -37,7 +42,7 @@ def build_random_vectors_and_memory_index(
         use_opq=False,
         filter_complexity=32,
         tags=tags,
-        index_prefix=index_prefix,
+        index_prefix=index_prefix
     )
 
     return (
@@ -47,5 +52,5 @@ def build_random_vectors_and_memory_index(
         index_vectors,
         ann_dir,
         os.path.join(ann_dir, "vectors.bin"),
-        tags,
+        tags
     )
