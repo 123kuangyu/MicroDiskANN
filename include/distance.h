@@ -1,6 +1,9 @@
 #pragma once
 #include "windows_customizations.h"
 #include <cstring>
+#include <map>
+#include <stdlib.h>
+
 
 namespace diskann
 {
@@ -15,6 +18,7 @@ enum Metric
 template <typename T> class Distance
 {
   public:
+    mutable std::map<std::pair<std::pair<float,float>,std::pair<float,float>>,float> dist_cache;
     DISKANN_DLLEXPORT Distance(diskann::Metric dist_metric) : _distance_metric(dist_metric)
     {
     }
@@ -64,7 +68,7 @@ template <typename T> class Distance
 
     // Providing a default implementation for the virtual destructor because we
     // don't expect most metric implementations to need it.
-    DISKANN_DLLEXPORT virtual ~Distance() = default;
+    DISKANN_DLLEXPORT virtual ~Distance();
 
   protected:
     diskann::Metric _distance_metric;

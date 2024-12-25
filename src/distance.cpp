@@ -13,6 +13,8 @@
 #include "simd_utils.h"
 #include <cosine_similarity.h>
 #include <iostream>
+#include <utility>
+// #include <pair>
 
 #include "distance.h"
 #include "utils.h"
@@ -59,6 +61,10 @@ template <typename T> void Distance<T>::preprocess_query(const T *query_vec, con
 template <typename T> size_t Distance<T>::get_required_alignment() const
 {
     return _alignment_factor;
+}
+
+template <typename T> Distance<T>::~Distance()
+{
 }
 
 //
@@ -521,6 +527,11 @@ template <typename T> float DistanceFastL2<T>::norm(const T *a, uint32_t size) c
 
 float AVXDistanceInnerProductFloat::compare(const float *a, const float *b, uint32_t size) const
 {
+        auto distance2 = dist_cache.find({{a[0],a[1]},{b[0],b[1]}});
+        if (distance2 != dist_cache.end())
+        {
+            return distance2->second;
+        }
     float result = 0.0f;
 #define AVX_DOT(addr1, addr2, dest, tmp1, tmp2)                                                                        \
     tmp1 = _mm256_loadu_ps(addr1);                                                                                     \
@@ -557,6 +568,14 @@ float AVXDistanceInnerProductFloat::compare(const float *a, const float *b, uint
     }
     _mm256_storeu_ps(unpack, sum);
     result = unpack[0] + unpack[1] + unpack[2] + unpack[3] + unpack[4] + unpack[5] + unpack[6] + unpack[7];
+
+    if (dist_cache.size() < (10000))
+    {
+        if(rand() % 100 < 2)
+        {
+            dist_cache.emplace(std::make_pair(std::make_pair(std::make_pair(a[0],a[1]),std::make_pair(b[0],b[1])), - result));
+        }
+    }
 
     return -result;
 }
@@ -725,9 +744,5 @@ template DISKANN_DLLEXPORT class DistanceFastL2<uint8_t>;
 template DISKANN_DLLEXPORT class SlowDistanceL2<float>;
 template DISKANN_DLLEXPORT class SlowDistanceL2<int8_t>;
 template DISKANN_DLLEXPORT class SlowDistanceL2<uint8_t>;
-
-template DISKANN_DLLEXPORT Distance<float> *get_distance_function(Metric m);
-template DISKANN_DLLEXPORT Distance<int8_t> *get_distance_function(Metric m);
-template DISKANN_DLLEXPORT Distance<uint8_t> *get_distance_function(Metric m);
 
 } // namespace diskann
