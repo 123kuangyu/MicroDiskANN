@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 #include <vector>
+
 #include "abstract_data_store.h"
 
 namespace diskann
